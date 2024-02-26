@@ -36,15 +36,18 @@ chdir %parent_dir%\MyScripts\Evidenta_grupelor
 pip install -r requirements.txt
 
 :: Acum, ca fisierele excel sunt pregatite, le vom copia in mapa unde este exe-ul
-:: Cream o mapa numita Evidenta_grupelor
-mkdir %current_dir%\Evidenta_grupelor
+mkdir "%current_dir%\Evidenta_grupelor"
+
+:: Revenim la MyScripts
+chdir %parent_dir%\MyScripts\Evidenta_grupelor
 :: Cautam prin toate fisierele din mapa %parent_dir%\MyScripts\Evidenta_grupelor si copiem excel-urile in %current_dir%\Evidenta_grupelor
 
-for %%a in (*.xlsx) do (xcopy /s %parent_dir%\MyScripts\Evidenta_grupelor\%%a  %current_dir%\Evidenta_grupelor
+for %%a in (*.xlsx) do (xcopy /s %parent_dir%\MyScripts\Evidenta_grupelor\%%a  "%current_dir%\Evidenta_grupelor"
 echo %%a)
 
 :: Vom crea in acest directoriu si un scenariu pentru rularea script-ului main_script
-chdir %current_dir%\Evidenta_grupelor
+chdir "%current_dir%\Evidenta_grupelor"
+
 IF EXIST email_agent.bat DEL /F email_agent.bat
 ECHO ECHO OFF >> email_agent.bat
 ECHO chdir %parent_dir%\MyScripts\Evidenta_grupelor  >> email_agent.bat
