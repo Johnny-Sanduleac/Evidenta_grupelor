@@ -230,8 +230,11 @@ def send_mail_to_recipients():
 def exit_app():
     # Garbage collector
     # Close all connections
-    if excel_obj:
-        excel_obj.close()
+    try:
+        if excel_obj:
+            excel_obj.close()
+    except:
+        pass
     for obj in dir():
         del globals()[obj]
     
