@@ -3,7 +3,7 @@
 Created on Tue Jan 23 21:28:11 2024
 
 @author: user
-"""
+""" 
 # Imports
 
 # 1. Base libraries
@@ -257,7 +257,7 @@ def check_for_updates():
     repo.remotes.origin.fetch()
     diff = repo.git.diff('origin/main')
     if len(diff) !=0:
-        print(diff)
+        print('diff = ', diff)
         popup_msg("New updates are avaialble!")
     
 def update():
