@@ -20,7 +20,7 @@ from email.mime.text import MIMEText # pentru textul scrisorii
 """ ************************** Main Functions ******************************"""
 
 
-""" ************************** Back END  ********************************"""
+""" ************************** Back END  ***********************************"""
 def connect_server(from_addr, password):
     """ Functia care stabileste conexiunea cu serverul"""
     global server
