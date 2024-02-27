@@ -249,6 +249,14 @@ def popup_msg(message):
     B1 = tk.Button(popup, text="Ok", padx = 30, pady = 5, borderwidth = 5, \
                    command = popup.destroy)
     B1.pack()   
+
+def check_for_updates():
+    parent_path = os.path.abspath(os.path.join(sys.executable, os.pardir))
+    repo_path = os.path.abspath(os.path.join(parent_path,"MyScripts\\Evidenta_grupelor" ))
+    repo = git.Repo(repo_path)
+    t = repo.head.commit.tree
+    if repo.git.dif(t):
+        popup_msg("New updates are avaialble!")
     
 def update():
     parent_path = os.path.abspath(os.path.join(sys.executable, os.pardir))
@@ -268,6 +276,10 @@ def update():
 root = tk.Tk()
 root.title("Email Agent")
 root.geometry("900x650")
+
+# When start GUI, we'll check for updates
+check_for_updates()
+
 
 # Font specifications
 fnt = ("Arial", 12, "bold")
