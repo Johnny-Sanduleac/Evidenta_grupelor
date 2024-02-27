@@ -260,11 +260,7 @@ def check_for_updates():
     
 def update():
     parent_path = os.path.abspath(os.path.join(sys.executable, os.pardir))
-    print(parent_path)
-    
     repo_path = os.path.abspath(os.path.join(parent_path,"MyScripts\\Evidenta_grupelor" ))
-    print(repo_path)
-    
     repo = git.Repo(repo_path)
     repo.git.reset('--hard','origin/main')
     origin = repo.remote(name='origin') 
