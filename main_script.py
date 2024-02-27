@@ -254,9 +254,10 @@ def check_for_updates():
     parent_path = os.path.abspath(os.path.join(sys.executable, os.pardir))
     repo_path = os.path.abspath(os.path.join(parent_path,"MyScripts\\Evidenta_grupelor" ))
     repo = git.Repo(repo_path)
-    commits_behind = repo.iter_commits()
-    commits = list(commits_behind)
-    if commits:
+    repo.remotes.origin.fetch()
+    diff = repo.git.diff('origin/main')
+    if len(diff) !=0:
+        print(diff)
         popup_msg("New updates are avaialble!")
     
 def update():
