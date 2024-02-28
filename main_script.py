@@ -265,9 +265,14 @@ def update():
     repo_path = os.path.abspath(os.path.join(parent_path,"MyScripts\\Evidenta_grupelor" ))
     repo = git.Repo(repo_path)
     repo.git.reset('--hard','origin/main')
-    origin = repo.remote(name='origin') 
-    origin.pull()
-    popup_msg("Successfully updated. Please restart the program!")
+    origin = repo.remote(name='origin')
+    origin.fetch()
+    diff = repo.git.diff('origin/main')
+    if len(diff) !=0:
+        origin.pull()
+        popup_msg("Successfully updated. Please restart the program!")
+    else:
+        popup_msg("Your program is up to date")
 
 
 """ GUI graphical elements """
