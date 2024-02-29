@@ -86,7 +86,7 @@ def open_excel(path_to_excel):
     try:
         excel_obj = openpyxl.load_workbook(path_to_excel, read_only=True, data_only=True)
     except:
-        popup_msg("Unable to read excel file. \ Please close the program and try again")
+        popup_msg("Unable to read excel file. \n Please close the program and try again")
     # Then, return the excel_object
     return excel_obj
 
