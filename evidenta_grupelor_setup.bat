@@ -51,7 +51,7 @@ chdir "%current_dir%\Evidenta_grupelor"
 IF EXIST email_agent.bat DEL /F evidenta_grupelor_agent.bat
 ECHO ECHO OFF >> evidenta_grupelor_agent.bat
 ECHO chdir %parent_dir%\MyScripts\Evidenta_grupelor  >> evidenta_grupelor_agent.bat
-ECHO python main_script.py >> evidenta_grupelor_agent.bat
+ECHO python evidenta_grupelor_main_script.py >> evidenta_grupelor_agent.bat
 ECHO ECHO "SUCCESS" >> evidenta_grupelor_agent.bat
 
 ECHO "Process finsihed with success!"
