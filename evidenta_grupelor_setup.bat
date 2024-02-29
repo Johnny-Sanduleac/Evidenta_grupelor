@@ -48,11 +48,11 @@ echo %%a)
 :: Vom crea in acest directoriu si un scenariu pentru rularea script-ului main_script
 chdir "%current_dir%\Evidenta_grupelor"
 
-IF EXIST email_agent.bat DEL /F email_agent.bat
-ECHO ECHO OFF >> email_agent.bat
-ECHO chdir %parent_dir%\MyScripts\Evidenta_grupelor  >> email_agent.bat
-ECHO python main_script.py >> email_agent.bat
-ECHO ECHO "SUCCESS" >> email_agent.bat
+IF EXIST email_agent.bat DEL /F evidenta_grupelor_agent.bat
+ECHO ECHO OFF >> evidenta_grupelor_agent.bat
+ECHO chdir %parent_dir%\MyScripts\Evidenta_grupelor  >> evidenta_grupelor_agent.bat
+ECHO python main_script.py >> evidenta_grupelor_agent.bat
+ECHO ECHO "SUCCESS" >> evidenta_grupelor_agent.bat
 
 ECHO "Process finsihed with success!"
 
