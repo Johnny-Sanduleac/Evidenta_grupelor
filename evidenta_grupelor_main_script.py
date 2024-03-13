@@ -85,8 +85,10 @@ def connect_server(from_addr, password):
 def open_excel(path_to_excel):
     try:
         excel_obj = openpyxl.load_workbook(path_to_excel, read_only=True, data_only=True)
+        l01.config(text = os.path.basename(path_to_excel))
     except:
-        popup_msg("Unable to read excel file. \n Please close the program and try again")
+        l01.config(text ="")
+        popup_msg("Unable to read excel file.")
     # Then, return the excel_object
     return excel_obj
 
@@ -311,6 +313,7 @@ root.config(menu = menubar) # Configuram root-ul ca sa stie ca in menu avem obie
 l0 = tk.Label(root, text = "Expedierea notelor si altor informatii catre studenti ", font = fnt, pady = 10)
 
 l1 = tk.Label(root, text = "Excel-ul cu note: ",font=fnt, pady = 10, padx = 10)
+l01 = tk.Label(root, text = "",font=fnt, pady = 10, padx = 10)
 b1 = tk.Button(root, text = "Browse ", fg = 'black', font=fnt,\
               padx = 30, pady = 5, borderwidth = 5,\
               bg = 'light blue',command = browse_excel)
@@ -381,6 +384,7 @@ l0.grid(sticky = "W", row = r, column = 0, columnspan = 5)
 r+=1
 l1.grid(row = r, column = 0, columnspan = 2)
 b1.grid(sticky = "W",row = r, column = 2, columnspan = 2, rowspan = 1)
+l01.grid(row = r, column = 4, columnspan = 2)
 
 r+=1
 l2.grid(row = r, column = 0, columnspan = 2)
