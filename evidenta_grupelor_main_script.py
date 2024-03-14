@@ -6,8 +6,9 @@ Created on Tue Jan 23 21:28:11 2024
 """ 
 # Imports
 
+
 # 1. Base libraries
-import openpyxl, sys, re, os, git
+import openpyxl, sys, re, os, git, webbrowser
 import tkinter as tk
 from tkinter import scrolledtext, Menu, ttk
 from tkinter.filedialog import askopenfilename
@@ -74,20 +75,23 @@ def connect_server(from_addr, password):
     if server:
         try:
             server.login(from_addr, password) # Ne logam pe account-ul nostru
-            b2.configure(bg='light blue',font=fnt, text = "Connected...")
-            b4['state'] = 'normal'; b4['bg'] = 'yellow'
-            b5['state'] = 'normal'; b5['bg'] = 'green'
+            check_server_connection_button.configure(bg='light blue',font=fnt, text = "Connected...", state = 'disabled')
+            send_test_email_button.configure(state = 'normal', bg = 'yellow')
+            send_button.configure(state = 'normal', bg = 'green')
+            sender_email_entry.configure(state='disabled')
+            sender_password_entry.configure(state='disabled')
         except:
             popup_msg("Failed to login. Check your login and password")
+            pass
     
 
 
 def open_excel(path_to_excel):
     try:
         excel_obj = openpyxl.load_workbook(path_to_excel, read_only=True, data_only=True)
-        l01.config(text = os.path.basename(path_to_excel))
+        excel_name_label.config(text = os.path.basename(path_to_excel))
     except:
-        l01.config(text ="")
+        excel_name_label.config(text ="")
         popup_msg("Unable to read excel file.")
     # Then, return the excel_object
     return excel_obj
@@ -105,9 +109,9 @@ def read_excel(excel_obj, sheet_name):
     name_email_info_dict = {}
     # Declare a regex expression for emails
     regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])") 
-    for row in range(rows):
+    for row in range(rows+1):
         # extragem valoarea din coloana C (care trebuie sa contina nume)
-        #verificam daca este ceva in celula
+        # verificam daca este ceva in celula
         if first_sheet[f"C{row}"].value:
             student_name = str(first_sheet[f"C{row}"].value).strip()
             # verificam daca e-mail-ul corespunde regex
@@ -115,12 +119,12 @@ def read_excel(excel_obj, sheet_name):
                 student_email = str(first_sheet[f"D{row}"].value).strip()
                 # Si adaugam la dictionar
                 name_email_info_dict.update({student_name: [student_email]})
+                
     # Now, we'll take the name chosen in combobox and we'll extract info from that sheet
-    #sheet_name = sheets_combo.get()
-    sheet_name = "Examen"
+    sheet_name = combobox.get()
     sheet = excel_obj[sheet_name]
     # Now, we'll collect all the information 
-    for row in range(rows):
+    for row in range(rows+1):
         # extragem valoarea din coloana B (care trebuie sa contina nume)
         cell_val = str(sheet[f"B{row}"].value)
         # Iteram prin cheile dictionarului si daca gasim in sheet-ul dat numele din dictionar
@@ -128,19 +132,21 @@ def read_excel(excel_obj, sheet_name):
             if name.strip() == cell_val.strip():
                 # Daca am gasit numele studentului, incepem formarea mesajului
                 # Daca sunt indicate coloanele din care se extrage nota
-                if e2.get():
+                if points_columns_entry.get():
                     punctaj_string = ""
-                    for i in e2.get().split(','):
+                    for i in points_columns_entry.get().split(','):
                         antet_punctaj = f"{sheet[f'{i.strip()}1'].value}".replace("_x000D_", " ")
                         punctaj = f"{sheet[f'{i.strip()}{row}'].value}"
                         if punctaj != "None":
                             punctaj_string += f"<br>{antet_punctaj} -- {punctaj} puncte "
                         else:
                             punctaj_string += f"<br>{antet_punctaj} -- 0 puncte "
+                else:
+                    punctaj_string = "" # Daca nu indicam nici o coloana cu punctaj
                     
-                if e3.get():
+                if mark_column_entry.get():
                     nota_string = ""
-                    for i in e3.get().split(','):
+                    for i in mark_column_entry.get().split(','):
                         antet_nota = f"{sheet[f'{i.strip()}1'].value}"
                         nota = f"{sheet[f'{i.strip()}{row}'].value}"
                         nota_string += (f"<br>{antet_nota} -- {nota}<br>" if nota != "None" else f"<br>{antet_nota} -- n/p<br>")
@@ -155,10 +161,10 @@ def format_message_content(student_email, student_info):
     # Mesajul inclus in email:
     msg = MIMEMultipart() # cream obiectul msg
     # 1. Antetetul scrisorii
-    msg['Subject'] = e6.get()
-    msg['From'] = e4.get()
+    msg['Subject'] = subject_entry.get()
+    msg['From'] = sender_email_entry.get()
     msg['To'] = student_email
-    content = "<br> ".join(e7.get('1.0','end-1c').split('\n')) + '<br>'
+    content = "<br> ".join(msg_content_entry.get('1.0','end-1c').split('\n')) + '<br>'
     content += student_info
     body = MIMEText(content, 'html') # creaza obiectul html - body
     msg.attach(body)  
@@ -177,22 +183,25 @@ def browse_excel():
     # If Excel file was read successfully, read all sheet names
     sheet_names = excel_obj.sheetnames
     # And insert these names in combobox
-    c0['values'] = sheet_names
+    combobox['values'] = sheet_names
 
 def combo_command(event):
     # Get sheet name from combo
     global name_email_info_dict
-    sheet_name = c0.get()
+    sheet_name = combobox.get()
     name_email_info_dict = read_excel(excel_obj, sheet_name)
     
     
     
+    
 def preview():
+    sheet_name = combobox.get()
+    name_email_info_dict = read_excel(excel_obj, sheet_name)
     # Now, we have excel_obj, path_to_excel and sheet_name
     with open(f"{os.path.dirname(path_to_excel)}\\{os.path.basename(path_to_excel).split('.')[:-1][0]}_Preview.html", mode = 'w', encoding="utf-8") as file:
         file.write('Informatia care va fi expediata la fiecare student: <br>')
-        file.write(f"Subiect: {str(e6.get())}  <br>")
-        content = "<br> ".join(e7.get('1.0','end-1c').split('\n'))
+        file.write(f"Subiect: {str(subject_entry.get())}  <br>")
+        content = "<br> ".join(msg_content_entry.get('1.0','end-1c').split('\n'))
         file.write(f"Continut: <br> {content} <br>")
         student_number = 0
         for student in name_email_info_dict.keys():
@@ -200,29 +209,37 @@ def preview():
             file.write(f"<br>{student_number}. {student}\n <br>")
             file.write(name_email_info_dict[student][0])
             file.write(name_email_info_dict[student][1])
-    popup_msg("Verificati in directoriul excel-ului, s-a generat un fisier html")
+            
+    url = f"{os.path.dirname(path_to_excel)}\\{os.path.basename(path_to_excel).split('.')[:-1][0]}_Preview.html"
+    new = 2 # open in a new tab, if possible
+    webbrowser.open(url,new=new)
+
     
     
 def send_mail_to_yourself():
     """Functia pentru a expedia mesaj pe propriul account"""
+    sheet_name = combobox.get()
+    name_email_info_dict = read_excel(excel_obj, sheet_name)
     # Luam prima cheie din dictionar - primul student
     first_key = list(name_email_info_dict.keys())[0]
     student_info = name_email_info_dict[first_key][1]
-    msg = format_message_content(e4.get(), student_info)
+    msg = format_message_content(sender_email_entry.get(), student_info)
     try:
-        server.sendmail(e4.get(), e4.get(), msg.as_string()) # Trimitem e-mail de pe account-ul nostru
+        server.sendmail(sender_email_entry.get(), sender_email_entry.get(), msg.as_string()) # Trimitem e-mail de pe account-ul nostru
         popup_msg("Expediat cu succes pe adresa Dvs.")
     except:
         popup_msg("Connection with mail server lost")
 
 def send_mail_to_recipients():
+    sheet_name = combobox.get()
+    name_email_info_dict = read_excel(excel_obj, sheet_name)
     """Functia pentru a expedia mesaje la fiecare email din excel"""
     for name in name_email_info_dict.keys():
         student_email = name_email_info_dict[name][0]
         student_info = name_email_info_dict[name][1]
         msg = format_message_content(student_email, student_info)
         try:
-            server.sendmail(e4.get(), student_email, msg.as_string()) # Trimitem e-mail de pe account-ul nostru
+            server.sendmail(sender_email_entry.get(), student_email, msg.as_string()) # Trimitem e-mail de pe account-ul nostru
             print(f"Successfully sent to {name}")
         except:
             print(f"Message not sent to {name}")
@@ -232,6 +249,7 @@ def send_mail_to_recipients():
 def exit_app():
     # Garbage collector
     # Close all connections
+    
     try:
         if excel_obj:
             excel_obj.close()
@@ -239,8 +257,8 @@ def exit_app():
         pass
     for obj in dir():
         del globals()[obj]
-    
     root.destroy()
+    
     
 def popup_msg(message):
     popup = tk.Tk()
@@ -277,6 +295,10 @@ def update():
         popup_msg("Your program is up to date")
 
 
+
+
+
+
 """ GUI graphical elements """
 root = tk.Tk()
 root.title("Email Agent")
@@ -310,67 +332,66 @@ root.config(menu = menubar) # Configuram root-ul ca sa stie ca in menu avem obie
 
 # Main widgets
 
-l0 = tk.Label(root, text = "Expedierea notelor si altor informatii catre studenti ", font = fnt, pady = 10)
+Info_label = tk.Label(root, text = "Expedierea notelor si altor informatii catre studenti ", font = fnt, pady = 10)
 
-l1 = tk.Label(root, text = "Excel-ul cu note: ",font=fnt, pady = 10, padx = 10)
-l01 = tk.Label(root, text = "",font=fnt, pady = 10, padx = 10)
-b1 = tk.Button(root, text = "Browse ", fg = 'black', font=fnt,\
+browse_excel_label = tk.Label(root, text = "Excel-ul cu note: ",font=fnt, pady = 10, padx = 10)
+excel_name_label = tk.Label(root, text = "",font=fnt, pady = 10, padx = 10)
+browse_excel_button = tk.Button(root, text = "Browse ", fg = 'black', font=fnt,\
               padx = 30, pady = 5, borderwidth = 5,\
               bg = 'light blue',command = browse_excel)
 # Combobox
-c0 = ttk.Combobox(root, state="readonly", width = 40, height=20, font = fnt)
-c0.bind("<<ComboboxSelected>>", combo_command)
+combobox_label = tk.Label(root, text = "Pagina cu note: ", font=fnt, pady = 10, padx = 10)
+combobox = ttk.Combobox(root, state="readonly", width = 40, height=20, font = fnt)
+combobox.bind("<<ComboboxSelected>>", combo_command)
 
-l2 = tk.Label(root, text = "Pagina cu note: ", font=fnt, pady = 10, padx = 10)
-
-l3 = tk.Label(root, text = "Coloanele (coloana) cu punctaj\n separate prin virgulă (optional)",font=fnt, pady = 10, padx = 10)
-e2 = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
-e2.insert(tk.END,'C, D, E, F, G, H, I')
+points_columns_label = tk.Label(root, text = "Coloanele (coloana) cu punctaj\n separate prin virgulă (optional)",font=fnt, pady = 10, padx = 10)
+points_columns_entry = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
+points_columns_entry.insert(tk.END,'C, D, E, F, G')
 
 
-l4 = tk.Label(root, text = "Coloanele (coloana) cu note\n separate prin virgulă",font=fnt, pady = 10)
-e3 = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
-e3.insert(tk.END,'K')
+mark_column_label = tk.Label(root, text = "Coloanele (coloana) cu note\n separate prin virgulă",font=fnt, pady = 10)
+mark_column_entry = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
+mark_column_entry.insert(tk.END,'K')
 
     
-l5 = tk.Label(root, text = "Adresa expeditorului", font=fnt, pady = 10)
-e4 = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
-e4.insert(0,'your_email')
+sender_email_label = tk.Label(root, text = "Adresa expeditorului", font=fnt, pady = 10)
+sender_email_entry = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
+sender_email_entry.insert(0,'your_email')
 
 
-l6 = tk.Label(root, text = "Parola expeditorului", font=fnt, pady = 10)
-e5 = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
-e5.insert(0,'app_password' )
+sender_password_label = tk.Label(root, text = "Parola expeditorului", font=fnt, pady = 10)
+sender_password_entry = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
+sender_password_entry.insert(0,'app_password' )
 
-l7 = tk.Label(root, text = "Subiect ", font=fnt, pady = 10)
-e6 = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
+subject_label = tk.Label(root, text = "Subiect ", font=fnt, pady = 10)
+subject_entry = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
 # Temporar, inseram ceva content
-e6.insert(0,'Rezultatele evaluării Nr....')
+subject_entry.insert(0,'Rezultatele evaluării Nr....')
     
-l8 = tk.Label(root, text = "Conținutul mesajului \n (un text opțional, \n de salut, semnătura etc.) ", font=fnt)
-e7 = scrolledtext.ScrolledText(root, wrap = tk.WORD, height = 12, width = 48,  borderwidth = 5, font=fnt)
+msg_content_label = tk.Label(root, text = "Conținutul mesajului \n (un text opțional, \n de salut, semnătura etc.) ", font=fnt)
+msg_content_entry = scrolledtext.ScrolledText(root, wrap = tk.WORD, height = 12, width = 48,  borderwidth = 5, font=fnt)
 
 # Temporar, inseram ceva content
-e7.insert('1.0','Bună ziua, \nmai jos găsiți notele de la evaluarea ...')
+msg_content_entry.insert('1.0','Bună ziua, \nmai jos găsiți notele de la evaluarea ...')
 
-b2 = tk.Button(root, text = "Check \nserver \nconnection ", fg = 'black', font=fnt,\
+check_server_connection_button = tk.Button(root, text = "Check \nserver \nconnection ", fg = 'black', font=fnt,\
               padx = 10, pady = 5, borderwidth = 5,\
-              bg = 'light blue',command = lambda:connect_server(e4.get(), e5.get()))
+              bg = 'light blue',command = lambda:connect_server(sender_email_entry.get(), sender_password_entry.get()))
     
-b3 = tk.Button(root, text = "Preview", fg = 'black', font=fnt,\
+preview_button = tk.Button(root, text = "Preview", fg = 'black', font=fnt,\
               padx = 25, pady = 8, borderwidth = 5,\
               bg = 'yellow',command = preview)
     
-b4 = tk.Button(root, state = 'disabled', text = "Send \ntest email", fg = 'black', font=fnt,\
+send_test_email_button = tk.Button(root, state = 'disabled', text = "Send \ntest email", fg = 'black', font=fnt,\
               padx = 20, pady = 8, borderwidth = 5,\
               bg = 'gray',command = send_mail_to_yourself)
 
 
-b5 = tk.Button(root, state = 'disabled', text = "SEND",fg = 'black',font=fnt,\
+send_button = tk.Button(root, state = 'disabled', text = "SEND",fg = 'black',font=fnt,\
                padx = 35, pady = 20, borderwidth = 5,\
                bg = 'gray',command = send_mail_to_recipients)
     
-b6 = tk.Button(root, text = "EXIT", fg = 'black', font=fnt,\
+exit_button = tk.Button(root, text = "EXIT", fg = 'black', font=fnt,\
               padx = 40, pady = 10, borderwidth = 5,\
               bg = 'red',command = exit_app)
     
@@ -379,49 +400,49 @@ b6 = tk.Button(root, text = "EXIT", fg = 'black', font=fnt,\
 """************* Window layout **************"""
     
 r = 0
-l0.grid(sticky = "W", row = r, column = 0, columnspan = 5)
+Info_label.grid(sticky = "W", row = r, column = 0, columnspan = 5)
 
 r+=1
-l1.grid(row = r, column = 0, columnspan = 2)
-b1.grid(sticky = "W",row = r, column = 2, columnspan = 2, rowspan = 1)
-l01.grid(row = r, column = 4, columnspan = 2)
+browse_excel_label.grid(row = r, column = 0, columnspan = 2)
+browse_excel_button.grid(sticky = "W",row = r, column = 2, columnspan = 2, rowspan = 1)
+excel_name_label.grid(row = r, column = 4, columnspan = 2)
 
 r+=1
-l2.grid(row = r, column = 0, columnspan = 2)
-c0.grid(sticky = "W",row = r, column = 2, columnspan = 4)
+combobox_label.grid(row = r, column = 0, columnspan = 2)
+combobox.grid(sticky = "W",row = r, column = 2, columnspan = 4)
 
 r+=1
-l3.grid(row = r, column = 0, columnspan = 2)
-e2.grid(row = r, column = 2, columnspan = 4)
-b2.grid(row = r, column = 6, columnspan = 2, rowspan = 2)
+points_columns_label.grid(row = r, column = 0, columnspan = 2)
+points_columns_entry.grid(row = r, column = 2, columnspan = 4)
+check_server_connection_button.grid(row = r, column = 6, columnspan = 2, rowspan = 2)
 
 r+=1
-l4.grid(row = r, column = 0, columnspan = 2)
-e3.grid(row = r, column = 2, columnspan = 4)
+mark_column_label.grid(row = r, column = 0, columnspan = 2)
+mark_column_entry.grid(row = r, column = 2, columnspan = 4)
 
 r+=1
-l5.grid(row = r, column = 0, columnspan = 2)
-e4.grid(row = r, column = 2, columnspan = 4)
-b3.grid(row = r, column = 6, columnspan = 2)
-
-
-r+=1
-l6.grid(row = r, column = 0, columnspan = 2)
-e5.grid(row = r, column = 2, columnspan = 4)
-b4.grid( row = r, column = 6, columnspan = 2, rowspan = 2)
-
-r+=1
-l7.grid(row = r, column = 0, columnspan = 2)
-e6.grid(row = r, column = 2, columnspan = 4)
-
+sender_email_label.grid(row = r, column = 0, columnspan = 2)
+sender_email_entry.grid(row = r, column = 2, columnspan = 4)
+preview_button.grid(row = r, column = 6, columnspan = 2)
 
 
 r+=1
-l8.grid(row = r, column = 0, columnspan = 2)
-e7.grid(row = r, column = 2, columnspan = 4, rowspan = 6)
-b5.grid(row = r, column = 6, columnspan = 2, rowspan = 2)
+sender_password_label.grid(row = r, column = 0, columnspan = 2)
+sender_password_entry.grid(row = r, column = 2, columnspan = 4)
+send_test_email_button.grid( row = r, column = 6, columnspan = 2, rowspan = 2)
+
+r+=1
+subject_label.grid(row = r, column = 0, columnspan = 2)
+subject_entry.grid(row = r, column = 2, columnspan = 4)
+
+
+
+r+=1
+msg_content_label.grid(row = r, column = 0, columnspan = 2)
+msg_content_entry.grid(row = r, column = 2, columnspan = 4, rowspan = 6)
+send_button.grid(row = r, column = 6, columnspan = 2, rowspan = 2)
 
 r+=4
-b6.grid(row = r, column = 6, columnspan = 2, rowspan = 2)
+exit_button.grid(row = r, column = 6, columnspan = 2, rowspan = 2)
 
 root.mainloop()
