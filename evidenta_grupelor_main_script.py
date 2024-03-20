@@ -196,7 +196,11 @@ def combo_command(event):
     
 def preview():
     sheet_name = combobox.get()
-    name_email_info_dict = read_excel(excel_obj, sheet_name)
+    try:
+        name_email_info_dict = read_excel(excel_obj, sheet_name)
+    except:
+        popup_msg("Selectati excel-ul cu note si alegeti pagina cu note")
+        return  0
     # Now, we have excel_obj, path_to_excel and sheet_name
     with open(f"{os.path.dirname(path_to_excel)}\\{os.path.basename(path_to_excel).split('.')[:-1][0]}_Preview.html", mode = 'w', encoding="utf-8") as file:
         file.write('Informatia care va fi expediata la fiecare student: <br>')
@@ -261,7 +265,7 @@ def exit_app():
     
     
 def popup_msg(message):
-    popup = tk.Tk()
+    popup = tk.Toplevel()
     popup.wm_title("Info")
     label = tk.Label(popup, text=message, fg = 'blue' )
     label.pack(side="top", fill="x", pady=20)
@@ -305,7 +309,7 @@ root.title("Email Agent")
 root.geometry("900x650")
 
 # When start GUI, we'll check for updates
-check_for_updates()
+#check_for_updates()
 
 
 # Font specifications
@@ -346,12 +350,12 @@ combobox.bind("<<ComboboxSelected>>", combo_command)
 
 points_columns_label = tk.Label(root, text = "Coloanele (coloana) cu punctaj\n separate prin virgulă (optional)",font=fnt, pady = 10, padx = 10)
 points_columns_entry = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
-points_columns_entry.insert(tk.END,'C, D, E, F, G')
+points_columns_entry.insert(tk.END,'C, D, E, F, G, H')
 
 
 mark_column_label = tk.Label(root, text = "Coloanele (coloana) cu note\n separate prin virgulă",font=fnt, pady = 10)
 mark_column_entry = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
-mark_column_entry.insert(tk.END,'K')
+mark_column_entry.insert(tk.END,'I')
 
     
 sender_email_label = tk.Label(root, text = "Adresa expeditorului", font=fnt, pady = 10)
@@ -360,8 +364,8 @@ sender_email_entry.insert(0,'your_email')
 
 
 sender_password_label = tk.Label(root, text = "Parola expeditorului", font=fnt, pady = 10)
-sender_password_entry = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
-sender_password_entry.insert(0,'app_password' )
+sender_password_entry = tk.Entry(root, show="*",  width = 50, borderwidth = 5, font=fnt)
+
 
 subject_label = tk.Label(root, text = "Subiect ", font=fnt, pady = 10)
 subject_entry = tk.Entry(root,  width = 50, borderwidth = 5, font=fnt)
