@@ -109,7 +109,7 @@ def read_excel(excel_obj, sheet_name):
     name_email_info_dict = {}
     # Declare a regex expression for emails
     regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])") 
-    for row in range(rows+1):
+    for row in range(rows+2):
         # extragem valoarea din coloana C (care trebuie sa contina nume)
         # verificam daca este ceva in celula
         if first_sheet[f"C{row}"].value:
@@ -124,7 +124,7 @@ def read_excel(excel_obj, sheet_name):
     sheet_name = combobox.get()
     sheet = excel_obj[sheet_name]
     # Now, we'll collect all the information 
-    for row in range(rows+1):
+    for row in range(rows+2):
         # extragem valoarea din coloana B (care trebuie sa contina nume)
         cell_val = str(sheet[f"B{row}"].value)
         # Iteram prin cheile dictionarului si daca gasim in sheet-ul dat numele din dictionar
@@ -209,6 +209,7 @@ def preview():
         file.write(f"Continut: <br> {content} <br>")
         student_number = 0
         for student in name_email_info_dict.keys():
+            print(student)
             student_number += 1
             file.write(f"<br>{student_number}. {student}\n <br>")
             file.write(name_email_info_dict[student][0])
