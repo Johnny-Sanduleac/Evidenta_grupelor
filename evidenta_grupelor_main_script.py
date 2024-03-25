@@ -249,7 +249,7 @@ def send_mail_to_recipients():
         except:
             print(f"Message not sent to {name}")
             pass
-    popup_msg("Finished sending emails...")
+    popup_msg("Emails successfully sent! ")
             
 def exit_app():
     # Garbage collector
