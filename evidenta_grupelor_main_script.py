@@ -310,7 +310,11 @@ root.title("Email Agent")
 root.geometry("900x650")
 
 # When start GUI, we'll check for updates
-check_for_updates()
+try:
+    check_for_updates()
+except:
+    popup_msg("No internet connection")
+    pass
 
 
 # Font specifications
