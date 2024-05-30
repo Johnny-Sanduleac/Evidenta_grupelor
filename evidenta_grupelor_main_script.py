@@ -98,31 +98,36 @@ def open_excel(path_to_excel):
 
 
 def read_excel(excel_obj, sheet_name):
-    # Extract first sheet (where names and emails are stored)
-    first_sheet = excel_obj.worksheets[0]
-    # Get maximum number of rows with data in first sheet (all the rest will have the same max number of rows)
-    rows = 0
-    for max_row, row in enumerate(first_sheet,1):
-        if not all(col.value is None for col in row):
-            rows +=1
-    # Extract email and position from the first sheet. A dictoinary with key-values. Keys are names, values are list[email, info]
-    name_email_info_dict = {}
     # Declare a regex expression for emails
     regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])") 
-    for row in range(rows+2):
-        # extragem valoarea din coloana C (care trebuie sa contina nume)
-        # verificam daca este ceva in celula
-        if first_sheet[f"C{row}"].value:
-            student_name = str(first_sheet[f"C{row}"].value).strip()
-            # verificam daca e-mail-ul corespunde regex
-            if first_sheet[f"D{row}"].value and re.fullmatch(regex, first_sheet[f"D{row}"].value.strip()):
-                student_email = str(first_sheet[f"D{row}"].value).strip()
-                # Si adaugam la dictionar
-                name_email_info_dict.update({student_name: [student_email]})
-                
-    # Now, we'll take the name chosen in combobox and we'll extract info from that sheet
+    # Declare a dictoinary with key-values. Keys are names, values are list[email, info]
+    name_email_info_dict = {}
+    first_sheet = excel_obj.worksheets[0]
+    # We'll take current sheet and we will extract student names from it
+    # That is done because in some sheets (e.g. Atestarea 1_2), only students who don't have posivive marks are copied
     sheet_name = combobox.get()
     sheet = excel_obj[sheet_name]
+    # Get maximum number of rows in this sheet
+    rows = 0
+    for max_row, row in enumerate(sheet,1):
+        if not all(col.value is None for col in row):
+            rows +=1
+    # Extract student names from column B
+    for row in range(rows+2):
+        # verificam daca este ceva in celula
+        if sheet[f"B{row}"].value:
+            student_name = str(sheet[f"B{row}"].value).strip()
+
+        # cautam acest student in prima pagina (pentru a extrage email-ul sau)
+            for i in range(rows+2):
+                if first_sheet[f"C{i}"].value:
+                    if student_name == first_sheet[f"C{i}"].value.strip():
+                    # extragem email-ul acestui student
+                        if first_sheet[f"D{i}"].value and re.fullmatch(regex, first_sheet[f"D{i}"].value.strip()):
+                            student_email = str(first_sheet[f"D{i}"].value).strip()
+                            # Si adaugam la dictionar
+                            name_email_info_dict.update({student_name: [student_email]})
+
     # Now, we'll collect all the information 
     for row in range(rows+2):
         # extragem valoarea din coloana B (care trebuie sa contina nume)
