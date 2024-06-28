@@ -124,7 +124,8 @@ def read_excel(excel_obj, sheet_name):
                     if student_name == first_sheet[f"C{i}"].value.strip():
                     # extragem email-ul acestui student
                         if first_sheet[f"D{i}"].value and re.fullmatch(regex, first_sheet[f"D{i}"].value.strip()):
-                            student_email = str(first_sheet[f"D{i}"].value).strip()
+                            student_email = str(first_sheet[f"D{i}"].
+                                                value).strip()
                             # Si adaugam la dictionar
                             name_email_info_dict.update({student_name: [student_email]})
 
