@@ -124,8 +124,7 @@ def read_excel(excel_obj, sheet_name):
                     if student_name == first_sheet[f"C{i}"].value.strip():
                     # extragem email-ul acestui student
                         if first_sheet[f"D{i}"].value and re.fullmatch(regex, first_sheet[f"D{i}"].value.strip()):
-                            student_email = str(first_sheet[f"D{i}"].
-                                                value).strip()
+                            student_email = str(first_sheet[f"D{i}"].value).strip()
                             # Si adaugam la dictionar
                             name_email_info_dict.update({student_name: [student_email]})
 
@@ -190,14 +189,13 @@ def browse_excel():
     sheet_names = excel_obj.sheetnames
     # And insert these names in combobox
     combobox['values'] = sheet_names
+    combobox.current(0)
 
 def combo_command(event):
     # Get sheet name from combo
     global name_email_info_dict
     sheet_name = combobox.get()
     name_email_info_dict = read_excel(excel_obj, sheet_name)
-    
-    
     
     
 def preview():
@@ -319,7 +317,7 @@ root.geometry("900x650")
 try:
     check_for_updates()
 except:
-    popup_msg("No internet connection")
+    popup_msg("Cannot check for updates. \n No internet connection or program path is not correct")
     pass
 
 
