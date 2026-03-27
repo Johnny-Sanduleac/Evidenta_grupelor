@@ -297,11 +297,10 @@ def update():
     local_commit = repo.head.commit
     remote_commit = repo.commit('origin/main')
     if local_commit != remote_commit:
-        print("Update found!")
         repo.git.reset('--hard','origin/main')
         popup_msg("Successfully updated. Please restart the program!")
+        exit_app()
     else:
-        print("NO UPDATE")
         popup_msg("Your program is up to date")
     
 
