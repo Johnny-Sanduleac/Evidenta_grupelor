@@ -295,8 +295,11 @@ def update():
     repo = git.Repo(repo_path)
     repo.git.reset('--hard','origin/main')
     origin = repo.remote(name='origin')
+    # 1. aducem update-urile
     origin.fetch()
-    diff = repo.git.diff('origin/main')
+    # 2. verificăm diferențele
+    diff = repo.git.diff('HEAD..origin/main')
+    print(diff)
     if len(diff) !=0:
         origin.pull()
         popup_msg("Successfully updated. Please restart the program!")
