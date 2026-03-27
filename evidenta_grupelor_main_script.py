@@ -385,7 +385,7 @@ msg_content_label = tk.Label(root, text = "Conținutul mesajului \n (un text op�
 msg_content_entry = scrolledtext.ScrolledText(root, wrap = tk.WORD, height = 12, width = 48,  borderwidth = 5, font=fnt)
 
 # Temporar, inseram ceva content
-msg_content_entry.insert('1.0','Bună ziua, \nmai jos găsiți notele de la evaluarea ...')
+msg_content_entry.insert('1.0','Bună ziua, \nmai jos găsiți notele de la ...')
 
 check_server_connection_button = tk.Button(root, text = "Check \nserver \nconnection ", fg = 'black', font=fnt,\
               padx = 10, pady = 5, borderwidth = 5,\
