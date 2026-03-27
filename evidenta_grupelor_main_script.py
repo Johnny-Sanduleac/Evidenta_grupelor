@@ -302,6 +302,7 @@ def update():
         popup_msg("Successfully updated. Please restart the program!")
     else:
         popup_msg("Your program is up to date")
+    exit_app()
 
 
 
