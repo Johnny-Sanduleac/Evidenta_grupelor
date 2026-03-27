@@ -293,23 +293,17 @@ def update():
     parent_path = os.path.abspath(os.path.join(sys.executable, os.pardir))
     repo_path = os.path.abspath(os.path.join(parent_path,"MyScripts\\Evidenta_grupelor" ))
     repo = git.Repo(repo_path)
-    repo.git.reset('--hard','origin/main')
-    origin = repo.remote(name='origin')
-    # 1. aducem update-urile
-    origin.fetch()
-    # 2. verificăm diferențele
-    diff = repo.git.diff('HEAD..origin/main')
-    print(diff)
-    if len(diff) !=0:
-        origin.pull()
+    # verificăm dacă există update
+    local_commit = repo.head.commit
+    remote_commit = repo.commit('origin/main')
+    if local_commit != remote_commit:
+        print("Update found!")
+        repo.git.reset('--hard','origin/main')
         popup_msg("Successfully updated. Please restart the program!")
     else:
+        print("NO UPDATE")
         popup_msg("Your program is up to date")
-    exit_app()
-
-
-
-
+    
 
 
 """ GUI graphical elements """
