@@ -299,19 +299,16 @@ def update():
     parent_path = os.path.abspath(os.path.join(sys.executable, os.pardir))
     repo_path = os.path.abspath(os.path.join(parent_path,"MyScripts\\Evidenta_grupelor" ))
     repo = git.Repo(repo_path)
-    repo.git.reset('--hard','origin/main')
-    origin = repo.remote(name='origin')
-    origin.fetch()
-    diff = repo.git.diff('origin/main')
-    if len(diff) !=0:
-        origin.pull()
+    # verificăm dacă există update
+    local_commit = repo.head.commit
+    remote_commit = repo.commit('origin/main')
+    if local_commit != remote_commit:
+        repo.git.reset('--hard','origin/main')
         popup_msg("Successfully updated. Please restart the program!")
+        exit_app()
     else:
         popup_msg("Your program is up to date")
-
-
-
-
+    
 
 
 """ GUI graphical elements """
@@ -391,7 +388,7 @@ msg_content_label = tk.Label(root, text = "Conținutul mesajului \n (un text op�
 msg_content_entry = scrolledtext.ScrolledText(root, wrap = tk.WORD, height = 12, width = 48,  borderwidth = 5, font=fnt)
 
 # Temporar, inseram ceva content
-msg_content_entry.insert('1.0','Bună ziua, \nmai jos găsiți notele de la evaluarea ...')
+msg_content_entry.insert('1.0','Bună ziua, \nmai jos găsiți notele de la ...')
 
 check_server_connection_button = tk.Button(root, text = "Check \nserver \nconnection ", fg = 'black', font=fnt,\
               padx = 10, pady = 5, borderwidth = 5,\
