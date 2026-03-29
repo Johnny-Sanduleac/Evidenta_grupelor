@@ -112,14 +112,20 @@ def read_excel(excel_obj, sheet_name):
     for max_row, row in enumerate(sheet,1):
         if not all(col.value is None for col in row):
             rows +=1
+    # Get maximum number of rows in the first sheet
+    rows_first_sheet = 0
+    for max_row, row in enumerate(first_sheet,1):
+        if not all(col.value is None for col in row):
+            rows_first_sheet +=1
     # Extract student names from column B
-    for row in range(rows+2):
+    for row in range(rows_first_sheet+2):
         # verificam daca este ceva in celula
         if sheet[f"B{row}"].value:
             student_name = str(sheet[f"B{row}"].value).strip()
 
         # cautam acest student in prima pagina (pentru a extrage email-ul sau)
-            for i in range(rows+2):
+        
+            for i in range(rows_first_sheet+2):
                 if first_sheet[f"C{i}"].value:
                     if student_name == first_sheet[f"C{i}"].value.strip():
                     # extragem email-ul acestui student
@@ -127,7 +133,7 @@ def read_excel(excel_obj, sheet_name):
                             student_email = str(first_sheet[f"D{i}"].value).strip()
                             # Si adaugam la dictionar
                             name_email_info_dict.update({student_name: [student_email]})
-
+    print(name_email_info_dict)
     # Now, we'll collect all the information 
     for row in range(rows+2):
         # extragem valoarea din coloana B (care trebuie sa contina nume)
