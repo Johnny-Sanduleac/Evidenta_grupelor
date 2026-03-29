@@ -133,7 +133,6 @@ def read_excel(excel_obj, sheet_name):
                             student_email = str(first_sheet[f"D{i}"].value).strip()
                             # Si adaugam la dictionar
                             name_email_info_dict.update({student_name: [student_email]})
-    print(name_email_info_dict)
     # Now, we'll collect all the information 
     for row in range(rows+2):
         # extragem valoarea din coloana B (care trebuie sa contina nume)
